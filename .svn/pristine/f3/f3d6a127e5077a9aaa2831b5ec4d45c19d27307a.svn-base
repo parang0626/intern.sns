@@ -1,0 +1,489 @@
+var lastBoardNum; // 마지막 버튼에서 
+var loadContentSw = false;
+var lastReplyNum; // 내부에서 찾기
+
+
+// 첫 실행시 데이터 초기화
+$(function() {
+	console.log("main ready, userNum = "+userNum);
+	getFirstContents();
+});
+
+
+
+// 상세보기 버튼
+$(document).on('click', '.btn-detailboard', function(){
+	var boardNum = $(this).data('boardnum');
+	console.log(boardNum);
+	$('#hiddenBoardNum').text(boardNum);
+	$('.detailBoard').modal({});
+});
+
+// 모달 처음 실행시 게시물 초기화
+var bn;
+$(document).on('show.bs.modal','.detailBoard',function(e){
+	bn = $(this).find('#hiddenBoardNum').text();
+	$.ajax({
+		url:'/board/'+bn,
+		type:'get',
+		success : function(data){
+			if(data.code == 1) {
+				var $image = $('#detailProfileImage').attr('src','/user/'+data.data.userNum+'/image');
+				var $imageBox = $('.detailProfileImageBox');
+				$('.detailUserName').text(data.data.userNick);
+				profileCrop($image,$imageBox);
+				var year = data.data.boardRegDate.substr(0,4);
+				var month = data.data.boardRegDate.substr(4,2);
+				var day = data.data.boardRegDate.substr(6,2);
+				var hour = data.data.boardRegDate.substr(8,2);
+				var min = data.data.boardRegDate.substr(10,2);
+				$('.detailRegDate').text(year+' 년 '+month+' 월 '+day+' 일 '+hour+':'+min);
+				if(data.data.boardRegDate != data.data.boardUdtDate) {
+					$('.detailmodified').text(' 수정됨 ');
+				}
+				if(userNum == data.data.userNum) {
+					$('.buttonLine').css('display','inline-block');
+				} else {
+					$('.buttonLine').css('display','none');
+				}
+				$('.boardContentBox').text(data.data.boardContent);
+				getFileList(bn);
+				getreplyListFirst(bn);
+				
+			}
+		}
+	});
+});
+
+// 모달 종료시 각 동적 데이터 초기화
+$(document).on('hide.bs.modal','.detailBoard',function(e){
+	$('.replylistLine').html('');
+	$('.fileDownList').html('');
+	$('.imageLine').html('');
+});
+
+// 무한 스크롤링으로 추가데이터 받아오기
+$(document).on('scroll',document,function(){
+	if(loadContentSw){
+		var maxHeight = $(document).height();
+		var currentScroll = $(window).scrollTop() + $(window).height();
+//		console.log('docment_height = '+maxHeight+' / scrllTop = '+$(window).scrollTop()+' / window_height = '+$(window).height()+' /current = '+currentScroll);
+		if (maxHeight <= currentScroll+10 ) {
+			loadContentSw = false;
+			$.ajax({
+				url:'/boards?pageNum=5&lastBoardNum='+lastBoardNum,
+				type:'get',
+				success : function(data){
+					var len = data.data.length;
+					
+					for(var i=0 ; i<len ;i++) {
+						var board = data.data[i];
+						
+						
+						var el='';
+						el += '<div class = \'col-md-12 boardContent\'>'
+						el += ' <div class = \'col-md-12 boardContentTopLine\'>'		
+						el += '  <div class=\'col-md-2 contentProfileBox\' >';
+						el += '   <img class=\"contentProfileImage\" src=\"/user/'+board.userNum+'/image"/>';
+						el += '  </div>';
+						el += '  <div class = \'col-md-2 contentUserNameBox\'>';
+						el += '   <h4 class=\'contentUserName\'>'+board.userNick+'</h4>';
+						el += '  </div>';
+						
+						var modify = '';
+						if(board.boardRegDate != board.boardUdtDate) {
+							modify = '수정됨';
+						}
+						el += '  <div class = \'col-md-2 col-md-offset-3 contentModifyBox\'>';
+						el += '   <p class=\'contentModify\'>'+modify+'</p>';
+						el += '  </div>';
+						
+						var year = board.boardRegDate.substr(0,4);
+						var month = board.boardRegDate.substr(4,2);
+						var day = board.boardRegDate.substr(6,2);
+						var hour = board.boardRegDate.substr(8,2);
+						var min = board.boardRegDate.substr(10,2);
+						
+						el += '  <div class = \'col-md-3 contentRegDate\'>';
+						el += '   <p class=\'contentModify\'>'+year+' 년 '+month+' 월 '+day+' 일 '+hour+':'+min+' </p>';
+						el += '  </div>';
+						el += ' </div>'; // boardContentTopLine			
+						el += ' <div class = \'col-md-12 boardContentMiddleLine\'>';
+						
+						if(board.firstImageUrl != null) {
+						el += '  <div class = \'col-md-4  contentFirstImageBox\'>';
+						el += '<img class=\"contentFirstImage\" src=\''+board.firstImageUrl+'\' />';
+						el += '  </div>';
+						}
+						el += '  <div class = \'col-md-8 contentText\'>';
+						
+						if(board.boardContent.length > 100){
+							var contentText = board.boardContent.substr(0,100)+ '...';
+						} else {
+							var contentText = board.boardContent;
+						}
+						
+						el += '   <p class=\'contentText\'>'+contentText +'</p>';
+						el += '  </div>'; 
+						el += ' </div>'; // boardContentMiddleLine
+						el += ' <div class = \'col-md-12 boardContentBottomLine\'>';
+						el += '   <div class = \'col-md-2 col-md-offset-6\'>';
+						
+						var fileCount = board.boardImgCnt + board.boardAudCnt +board.boardVidCnt;
+						if(fileCount != 0) {
+							el += '     <p class=\'fileCount\'>파일 수 :'+fileCount+'</p>';	
+						}
+						
+						el += '    </div>';
+						el += '   <div class = \'col-md-2 \'>';
+						el += '     <p class=\'fileCount\'>댓글 수 :'+board.boardReplyCnt+'</p>';
+						el += '    </div>';
+						el += '   <div class = \'col-md-2 \'>';
+						el += '     <button class=\'btn btn-default btn-detailboard\' data-boardnum =\''+board.boardNum+'\'>더보기 </button>';
+						el += '    </div>';
+						el += ' </div>'; // boardContentBottomLine
+						el += '</div>';
+						
+						$('#contents').append(el);
+						lastBoardNum = board.boardNum;
+						console.log('boardNum = '+board.boardNum);
+						setContentsCss();
+					}
+
+					loadContentSw = true;
+				}
+			});
+	     }	
+	}
+	
+});
+
+// 댓글 등록
+$(document).on('click','#createReply',function(){
+	var replyContent = $('#inputReplyText').val();
+	var boardNum = $('#hiddenBoardNum').text();
+	console.log('등록할 댓글내용'+replyContent);
+	$.ajax({
+		url : '/board/'+boardNum+'/reply',
+		type : 'post',
+		data : {'replyContent':replyContent},
+		success:function(data) {
+			console.log('댓글 등록 : '+data.code+'//'+data.message);
+			if(data.code == 1) {
+				$('.replylistLine').html('');
+				getreplyListFirst(boardNum);
+			}
+		}
+	});
+});
+
+// 댓글 리스트 더받아오기
+$(document).on('click','#plusReplys',function(){
+	var boardNum = $('#hiddenBoardNum').text();
+	$.ajax({
+		url:'/board/'+boardNum+'/replys?pageNum=3&lastReplyNum='+lastReplyNum,
+		type:'get',
+		success: function(data) {
+			if(data.code ==1) {
+				var len = data.data.length;
+				console.log('댓글  '+data.data);
+				for( var i=0;i<len;i++) {
+					var el = '';
+					
+					el += '<div class=\"col-md-12 replyContainer\">';
+					el += ' 	<div class=\"col-md-2 replyProfileBox\">';
+					el += ' 		<img class=\"replyProfile\" src=\"/user/'+data.data[i].userNum+'/image\" />';
+					el += ' 	</div>';
+					el += ' 	<div class=\"col-md-10 replyContentBox\">';
+					el += ' 		<div class=\"col-md-12 replyTopLine\">';
+					el += '<div class=\'hiddenReplyNum\'>'+data.data[i].replyNum+'</div>';
+					el += ' 		 <p class=\"replyTop replyUserName\">'+data.data[i].userNick+'</p>';
+					
+					var year = data.data[i].replyRegDate.substr(0,4);
+					var month = data.data[i].replyRegDate.substr(4,2);
+					var day = data.data[i].replyRegDate.substr(6,2);
+					var hour = data.data[i].replyRegDate.substr(8,2);
+					var min = data.data[i].replyRegDate.substr(10,2);
+					
+					el += ' 		 <p class=\"replyTop replydata\">'+year+' 년 '+month+' 월 '+day+' 일 '+hour+':'+min+' </p>';
+					
+					if(data.data[i].replyRegDate != data.data[i].replyUdtDate) {
+						el += ' 		 <p class=\"replyTop replymodifyed\"> 수정됨 </p>';
+					}
+					if(userNum == data.data[i].userNum) {
+						el += ' 		 <a class=\"replyTopright replymodify\"> 수정 </a>';
+						el += ' 		 <p class=\"replyTopright \"> / </p>';
+						el += ' 		 <a class=\"replyTopright replyremove\"> 삭제 </a>';
+					}
+					
+					el += ' 		<div class=\"col-md-12 replyBottomLine\">';
+					el += ' 		 <p class=\"replyContent\">'+data.data[i].replyContent +'</p>';
+					el += ' 	 	</div>';
+					el += ' 	 	</div>';	
+					el += ' 	</div>';
+					el += '</div>';
+					
+					lastReplyNum = data.data[i].replyNum;
+					$('.replylistLine').append(el);
+					$('.hiddenReplyNum').css('display','none');
+					$(window).resize();
+					setReplyCss();
+				}
+			} 
+		}
+	});
+});
+
+// 댓글 삭제
+$(document).on('click','.replyremove',function(){
+	var rn = $(this).parent().children('.hiddenReplyNum').text();
+	$.ajax({
+		url:'board/'+bn+'/reply/'+rn,
+		type:'delete',
+		success : function(data) {
+			console.log(data.code + " // "+ data.message);
+			if(data.code == 1) {
+				$('.replylistLine').html('');
+				getreplyListFirst(bn);
+			}
+		}
+	});
+});
+
+// 댓글 수정
+$(document).on('click','.replymodify',function(){
+	var rn = $(this).parent().children('.hiddenReplyNum').text();
+	var bc = $(this).parent().children('.replyBottomLine').children('.replyContent').text();
+	var el='';
+	
+	el += '<input type=\'text\' class=\'modiyReplyText\' />';
+	
+	$(this).parent().children('.replyBottomLine').html(el);
+	$('.modiyReplyText').val(bc);
+	$('.modiyReplyText').css('width','100%');
+	$(document).on('keyup','.modiyReplyText',function(e){
+		if (e.keyCode == 13) {
+			var newbc = $('.modiyReplyText').val();
+			$.ajax({
+				url:'board/'+bn+'/reply/'+rn,
+				type:'post',
+				data:{'replyContent' : newbc },
+				success : function(data) {
+					console.log(data.code + " // "+ data.message);
+					if(data.code == 1) {
+						$('.replylistLine').html('');
+						getreplyListFirst(bn);
+					}
+				}
+			});
+		}
+	});
+	
+});
+
+// 게시물 삭제
+$(document).on('click','#btn-detailDelete',function(){
+	bn = $('.detailBoard').find('#hiddenBoardNum').text();
+	
+	$.ajax({
+		url:'/board/'+bn,
+		type:'delete',
+		success:function(data){
+			console.log('게시물 삭제'+data.code+data.message);
+			if(data.code = 1) {
+				$('.detailBoard').hide();
+				location.replace('/main');
+				
+			}
+		}
+	})
+});
+
+
+// 첫 게시물 받아오기
+function getFirstContents() {
+	$.ajax({
+		url:'/boards',
+		type:'get',
+		success : function(data){
+			var len = data.data.length;
+			for(var i=0 ; i<len ;i++) {
+				var board = data.data[i];
+				var el='';
+				el += '<div class = \'col-md-12 boardContent\'>'
+				el += ' <div class = \'col-md-12 boardContentTopLine\'>'	
+				el += '  <div class=\'col-md-2 contentProfileBox\' >';
+				el += '   <img class=\"contentProfileImage\" src=\"/user/'+board.userNum+'/image"/>';
+				el += '  </div>';
+				el += '  <div class = \'col-md-2 contentUserNameBox\'>';
+				el += '   <h4 class=\'contentUserName\'>'+board.userNick+'</h4>';
+				el += '  </div>';
+				
+				var modify = '';
+				if(board.boardRegDate != board.boardUdtDate) {
+					modify = '수정됨';
+				}
+				
+				el += '  <div class = \'col-md-2 col-md-offset-3 contentModifyBox\'>';
+				el += '   <p class=\'contentModify\'>'+modify+'</p>';
+				el += '  </div>';
+						
+				var year = board.boardRegDate.substr(0,4);
+				var month = board.boardRegDate.substr(4,2);
+				var day = board.boardRegDate.substr(6,2);
+				var hour = board.boardRegDate.substr(8,2);
+				var min = board.boardRegDate.substr(10,2);
+				
+				el += '  <div class = \'col-md-3 contentRegDate\'>';
+				el += '   <p class=\'contentModify\'>'+year+' 년 '+month+' 월 '+day+' 일 '+hour+':'+min+' </p>';
+				el += '  </div>';			
+				el += ' </div>'; // boardContentTopLine
+				el += ' <div class = \'col-md-12 boardContentMiddleLine\'>';
+				
+				if(board.firstImageUrl != null) {
+				el += '  <div class = \'col-md-4  contentFirstImageBox\'>';
+				   el += '<img class=\"contentFirstImage\" src=\''+board.firstImageUrl+'\' />';
+				   el += '  </div>';
+				}
+				 
+				el += '  <div class = \'col-md-8 contentText\'>';
+				
+				if(board.boardContent.length > 100){
+					var contentText = board.boardContent.substr(0,100)+ '...';
+				} else {
+					var contentText = board.boardContent;
+				}
+				
+				el += '   <p class=\'contentText\'>'+contentText +'</p>';
+				el += '  </div>'; 
+				el += ' </div>'; // boardContentMiddleLine
+				el += ' <div class = \'col-md-12 boardContentBottomLine\'>';
+				el += '   <div class = \'col-md-2 col-md-offset-6\'>';
+				
+				var fileCount = board.boardImgCnt + board.boardAudCnt +board.boardVidCnt;
+				if(fileCount != 0) {
+					el += '     <p class=\'fileCount\'>파일 수 :'+fileCount+'</p>';	
+				}
+				
+				el += '    </div>';
+				el += '   <div class = \'col-md-2 \'>';
+				el += '     <p class=\'fileCount\'>댓글 수 :'+board.boardReplyCnt+'</p>';
+				el += '    </div>';
+				el += '   <div class = \'col-md-2 \'>';
+				el += '     <button class=\'btn btn-default btn-detailboard\' data-boardnum =\''+board.boardNum+'\'>더보기 </button>';
+				el += '    </div>';
+				el += ' </div>'; // boardContentBottomLine
+				el += '</div>';
+				
+				$('#contents').append(el);
+				lastBoardNum = board.boardNum;
+				console.log('bn ='+board.boardNum);
+				setContentsCss();
+			}
+			console.log("--------------");
+			loadContentSw = true;
+		}
+	});
+	
+}
+
+
+// 게시물 파일리스트 받아오기
+function getFileList(boardNum) {
+	console.log('check1'+boardNum);
+	$.ajax({
+		url : '/board/'+boardNum+'/files',
+		tpye :'get',
+		success: function(data) {
+			if(data.code == 1) {
+				var len = data.data.length;
+				for(var i=0; i<len; i++) {
+					var fType = data.data[i].fileType;
+					if(fType.startsWith('image')) {
+						var img = '';
+						img +='<img class=\"showImage\" src=\"'+data.data[i].fileUrl+'\" />';
+						
+						$('.imageLine').append(img);
+						$('.showImage').css('height','100px');
+						$('.showImage').css('width','auto');
+						$('.showImage').css('margin-right','3px');
+					}
+					var filesizse = data.data[i].fileSize.toFixed(2); 
+					var el ='';
+					
+					el +='<li class=\"fileDownItem\"><a href=\"'+data.data[i].fileUrl+'?view=down'+'\">'+data.data[i].fileName+'\t\t'+filesizse+' KB </a></li>';
+					
+					$('.fileDownList').append(el);
+				}
+				
+			}
+		}
+	});
+}
+
+
+// 게시물 첫 댓글리스트 받아오기
+function getreplyListFirst(boardNum){
+	$('.replylistLine').html('');
+	$.ajax({
+		url:'/board/'+boardNum+'/replys',
+		type:'get',
+		success: function(data) {
+			if(data.code ==1) {
+				var len = data.data.length;
+				console.log('댓글  '+data.data);
+				for( var i=0;i<len;i++) {
+					var el = '';
+					el += '<div class=\"col-md-12 replyContainer\">';
+					el += ' 	<div class=\"col-md-2 replyProfileBox\">';
+					el += ' 		<img class=\"replyProfile\" src=\"/user/'+data.data[i].userNum+'/image\" />';
+					el += ' 	</div>';
+					el += ' 	<div class=\"col-md-10 replyContentBox\">';
+					el += ' 		<div class=\"col-md-12 replyTopLine\">';
+					el += '<div class=\'hiddenReplyNum\'>'+data.data[i].replyNum+'</div>';
+					el += ' 		 <p class=\"replyTop replyUserName\">'+data.data[i].userNick+'</p>';
+					var year = data.data[i].replyRegDate.substr(0,4);
+					var month = data.data[i].replyRegDate.substr(4,2);
+					var day = data.data[i].replyRegDate.substr(6,2);
+					var hour = data.data[i].replyRegDate.substr(8,2);
+					var min = data.data[i].replyRegDate.substr(10,2);
+					el += ' 		 <p class=\"replyTop replydata\">'+year+' 년 '+month+' 월 '+day+' 일 '+hour+':'+min+' </p>';
+					if(data.data[i].replyRegDate != data.data[i].replyUdtDate) {
+						el += ' 		 <p class=\"replyTop replymodifyed\"> 수정됨 </p>';
+					}
+					if(userNum == data.data[i].userNum) {
+						el += ' 		 <a class=\"replyTopright replymodify\"> 수정 </a>';
+						el += ' 		 <p class=\"replyTopright \"> / </p>';
+						el += ' 		 <a class=\"replyTopright replyremove\"> 삭제 </a>';
+					}
+					el += ' 		<div class=\"col-md-12 replyBottomLine\">';
+					el += ' 		 <p class=\"replyContent\">'+data.data[i].replyContent +'</p>';
+					el += ' 	 	</div>';
+					el += ' 	 	</div>';	
+					el += ' 	</div>';
+					el += '</div>';
+					
+					lastReplyNum = data.data[i].replyNum;
+					$('.replylistLine').append(el);
+					$('.hiddenReplyNum').css('display','none');
+					$(window).resize();
+					setReplyCss();
+				}
+			} 
+		}
+	});
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

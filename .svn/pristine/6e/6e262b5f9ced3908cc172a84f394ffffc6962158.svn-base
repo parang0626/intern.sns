@@ -1,0 +1,43 @@
+
+html, body {
+	height : auto;
+}
+
+aside {
+	width: 10%;
+	min-width : 60px;
+	float: left;
+	background-color: #ccc;
+	height : 100%;
+}
+
+section {
+	margin-right: 10%;
+	margin-bottom: 10%;
+	min-width : 300px;
+	width: 70%;
+	float: right;
+	height : auto;
+}
+
+ul {
+	margin-top: 10px;
+	padding-left:0px;
+}
+
+li  {
+	list-style: none;
+	height : 50px;
+	color: white;
+	line-height: 50px;
+	vertical-align: middle;
+	text-align: left;
+	margin-left : 10px;
+	border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+	
+}
+
+.sidemenu {
+	margin-left : 10px;
+}

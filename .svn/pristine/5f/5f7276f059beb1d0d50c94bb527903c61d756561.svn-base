@@ -1,0 +1,3 @@
+sns\platform\dbtest\MybatisTest.class
+sns\platform\dbtest\UserDAOTest.class
+sns\platform\dbtest\DataSourceTest.class

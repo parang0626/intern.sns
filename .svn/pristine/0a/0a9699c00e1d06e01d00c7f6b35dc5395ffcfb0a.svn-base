@@ -1,0 +1,22 @@
+package sns.platform.biz.view;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name="aa")
+public class Testss {
+	@XmlElement(name="bb")
+	public String ss;
+	
+	public String gets() {
+		return ss;
+	}
+	
+}
+
+/**
+ * input 
+ * <aa>
+ * <bb>1</bb>
+ * </aa>
+ * */

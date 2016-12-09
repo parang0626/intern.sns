@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+
+<!-- 루트 설정파일 읽어오는 위치 설정 -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:/config/root-context.xml</param-value>
+	</context-param>
+	
+	
+	 <listener>
+  		<listener-class>
+  			org.springframework.web.context.ContextLoaderListener
+  		</listener-class>
+  	</listener>
+
+	<!-- dispathcer start -->
+	<servlet>
+		<servlet-name>dispatcher</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name><!-- 여기에 있는 위치로 설정을 받아옴 -->
+			<param-value>classpath:/config/servlet-context.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup> <!-- 서블릿 호출의 우선순위를 정함 -->
+
+		<!-- 멀티파트설정을 위한 부분 -->
+		<multipart-config>
+			<location>C:\sns.platform.files</location> <!-- 저장될 위치 설정 -->
+			<max-file-size>-1</max-file-size><!-- 파일 최대 사이즈 설정 -1일경우 제약없음 -->
+			<max-request-size>-1</max-request-size><!-- 멀티파트 요청데이터의 최대크기 바이트단위 -1은 
+				제약없음 -->
+			<file-size-threshold>1024</file-size-threshold><!-- 업로드한 파일의 크기가 이태그값보다 
+				크면 로케이션에 설정 한 위치에 임시로 파일을 생성하고 아닐경우 메모리에생성 -->
+		</multipart-config>
+
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>dispatcher</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+	<!-- dispathcer end -->
+
+	<!-- encoidng filter start -->
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<!-- encoding filter end -->
+
+	
+
+</web-app>

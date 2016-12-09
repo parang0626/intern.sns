@@ -1,0 +1,89 @@
+$(function(){
+	var $image = $('#uploadProfileImage').attr('src','/user/'+userNum+'/image');
+	var $imageBox = $('.uploadProfileImageBox');
+	profileCrop($image,$imageBox)
+	$('aside').css('height',$(document).height()+'px');
+});
+
+// 파일 업로드 
+$(document).on('change','.uploadFile',function(){
+		var $file = $(this).val();
+		if ($file != null) {
+			var fileType = this.files[0].type;
+			if (fileType.startsWith('image')
+				|| fileType.startsWith('audio')
+				|| fileType.startsWith('video')) {
+					var $fileSize = this.files[0].size / 1024.0;
+					console.log("Type: " + this.files[0].type);
+					var $fileSizeFix = $fileSize.toFixed(2);
+					$(this).parent().children('.uploadFileSize').text($fileSizeFix + ' KB');
+							if ($(this).parent().children('.fileDelete').length == 0) {
+								var delBtn = '<button class=\'fileDelete\'>삭제</button>';
+								$(this).parent().append(delBtn);
+								var uploadbox = '';
+								uploadbox += '<div class=\"col-md-11 col-md-offset-1 fileUploadBox\">';
+								uploadbox += '  <input type=\"file\" class = \"uploadFile\" />';
+								uploadbox += '   <p class=\"uploadFileSize\">0 KB</p>';
+								uploadbox += '  </div>';
+								$(this).parent().parent().append(uploadbox);
+							}
+							$($)
+						} else {
+							$(this).replaceWith($(this).clone(true));
+							$file = null;
+							$('#uploadPrintMessage').css('font-color','red');
+						}
+			$('aside').css('height',$(document).height()+'px');
+					} 
+}) ;
+
+//파일 삭제 버튼
+$(document).on('click','.fileDelete',function() {
+	var $fileCount = $(this).parent().parent().children('.fileUploadBox').length;
+	if($fileCount > 1) {
+		$(this).parent().remove();
+	} else {
+		$(this).parent().children('.uploadFile').val(null);
+	}
+});
+ 
+//취소 버튼
+$(document).on('click','#btn-uploadCancel',function() {
+	$(location).attr('href','/main');
+});
+
+//업로드 버튼
+$(document).on('click','#btn-upload',function(){
+	
+	var fileNum = $('.uploadFile').length-1;
+	var $files = $('.uploadFile');
+	var formData = new FormData();
+	formData.append('boardContent', $('#inputBoardContent').val());
+	for( var i = 0 ; i < fileNum ;i++) {
+		formData.append('files', $files[i].files[0]);
+		console.log('fileappend'+i+' // '+$files.eq(i).val()+' // '+$files[0].files[0]);
+	}
+	
+	$.ajax({
+		url : '/board',
+		type : 'post',
+		processData : false,
+		contentType : false,
+		data : formData,
+		success : function(data) {
+			console.log(data.code+" / "+data.message);
+			if(data.code == 1){
+				$(location).attr('href','/main');
+			}
+		}
+	    
+	
+	});
+
+	
+	
+	
+
+	
+	
+});

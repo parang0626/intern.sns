@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sns.platform.mapper.FileMapper">
+
+<resultMap type="java.util.HashMap" id="fileMap">
+		<result column="BOARD_NUMBER" property="boardNum" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="FILE_TYPE" property="fileType" />
+		<result column="FILE_PATH" property="filePath" />
+		<result column="FILE_NUMBER" property="fileNum" />
+		<result column="FILE_SIZE" property="fileSize" />
+	
+	</resultMap>
+	
+	<insert id="insertFile">
+		INSERT INTO FILE(
+		       BOARD_NUMBER,
+		       FILE_NAME,
+		       FILE_TYPE,
+		       FILE_PATH,
+		       FILE_SIZE
+		) VALUES (
+		       #{boardNum},
+		       #{fileName},
+		       #{fileType},
+		       #{filePath},
+		       #{fileSize}
+		)
+		<selectKey resultType="int" keyProperty="insertFileNum" order="AFTER">
+	    SELECT LAST_INSERT_ID()
+	   </selectKey>
+	</insert>
+	
+	<select id="selectFilePath" resultType="string">
+		SELECT FILE_PATH
+		  FROM FILE
+		 WHERE FILE_NUMBER = #{fileNum}  		          
+	</select>
+	
+	
+	<select id="selectFiles" resultMap="fileMap">
+		SELECT FILE_NAME,
+		       FILE_NUMBER,
+			   FILE_TYPE,
+			   FILE_PATH,
+			   FILE_SIZE,
+			   FILE_NUMBER			   
+		  FROM FILE
+		 WHERE BOARD_NUMBER = #{boardNum}  		          
+	</select>
+	
+	<select id="selectDelFilePath" resultType="String">
+		SELECT FILE_PATH		   
+		  FROM FILE
+		 WHERE BOARD_NUMBER = #{boardNum}  		          
+	</select>
+	
+	
+	<select id="selectDelFilesType" resultMap="fileMap">
+		SELECT FILE_NUMBER,FILE_TYPE			   
+		  FROM FILE
+		 WHERE BOARD_NUMBER = #{boardNum}  		          
+	</select>
+	
+	<!--  리스트안에 포함된 번호 파일 리스트를 지운다. -->
+	<delete id="deleteFilesInNumbers" >
+		DELETE
+		  FROM FILE
+		 WHERE FILE_NUMBER IN
+	  <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+	     #{item}
+	  </foreach> 
+	</delete>
+	
+	
+	<select id="selectDelFilesPathInList" parameterType="list" resultMap="fileMap">
+		SELECT FILE_PATH
+		  FROM FILE
+		 WHERE FILE_NUMBER IN
+	  <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+	     #{item}
+	  </foreach> 
+	</select>
+	
+	<delete id="deleteFile">
+		DELETE
+		  FROM FILE
+		 WHERE FILE_NUMBER = #{fileNum} 
+	</delete>
+	
+	
+	<delete id="deleteFilesInBoard">
+		DELETE
+		  FROM FILE
+		 WHERE BOARD_NUMBER = #{boardNum} 
+	</delete>
+
+</mapper>

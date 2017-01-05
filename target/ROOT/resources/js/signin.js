@@ -6,6 +6,7 @@ $(function() {
 	var $inputPasswordText = $('#inputPassword');
 
 	var isMessage; // 가장 상단메세지가 나오도록 정하는 스위치
+	
 
 
 });

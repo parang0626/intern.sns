@@ -27,8 +27,6 @@
 		<property name="url"
 			value="#{properties['jdbc.url']}" />
 
-		<!-- 실서버 jdbc:mysql://192.168.6.18:3306/sns -->
-		<!-- 로컬 jdbc:mariadb://localhost:3306/openit_beginner -->
 		<property name="username" value="#{properties['jdbc.username']}"></property>
 		<property name="password" value="#{properties['jdbc.userpass']}"></property>
 	</bean>

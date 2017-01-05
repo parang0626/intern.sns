@@ -1,12 +1,11 @@
 
+
+
 /**게시물 상세 시작*/
 
 // 모달 처음 실행시 게시물 초기화
 $(document).on('show.bs.modal','.detailBoard',function(e){
 	var bn = $('.detailBoard').data('boardNum');
-	
-	
-	
 	console.log("상세보기 게시물번호  :"+bn);
 	$.ajax({
 		url:'/board/'+bn,
@@ -45,11 +44,11 @@ $(document).on('show.bs.modal','.detailBoard',function(e){
 			}
 		}
 	});
+	
 });
 
 // 모달 데이터들 다 불러온후 화면 리사이징
 $(document).on('shown.bs.modal','.detailBoard',function(e){
-//	$('.modal-header').css('height','200px');
 });
 
 
@@ -453,6 +452,7 @@ function getFileList(boardNum) {
 		success: function(data) {
 			if(data.code == 1) {
 				var len = data.data.length;
+				var imageNum = 0;
 				for(var i=0; i<len; i++) {
 					var fType = data.data[i].fileType;
 					if(fType.startsWith('image')) {
@@ -460,14 +460,12 @@ function getFileList(boardNum) {
 						img +='<img class="showImage" src="'+data.data[i].fileUrl+'" />';
 						
 						$('.imageLine').append(img);
-						$('.showImage').css('height','100px');
-						$('.showImage').css('width','auto');
-						$('.showImage').css('margin-right','3px');
+				
 					}
 					var filesizse = data.data[i].fileSize.toFixed(2); 
 					var el ='';
 					
-					el +='<li class="fileDownItem"><a href="'+data.data[i].fileUrl+'?view=down'+'">'+data.data[i].fileName+'\t\t'+filesizse+' KB </a></li>';
+					el +='<li class="fileDownItem"><button class="btn btn-default><a href="'+data.data[i].fileUrl+'?view=down'+'">'+data.data[i].fileName+'\t\t'+filesizse+' KB </a></button></li>';
 					
 					$('.fileDownList').append(el);
 				}

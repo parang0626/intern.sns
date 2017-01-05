@@ -8,7 +8,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>메인 화면</title>
 
-<link rel="stylesheet" href="resources/css/bootstrap.min.css">
 <link rel="stylesheet" href="resources/css/detailboard.css">
 
 <script src="resources/js/jquery-3.1.1.min.js"></script>
@@ -28,65 +27,79 @@
 	<div class="modal fade detailBoard" id="detailBoards">
 		<div class="modal-dialog">
 			<div class="modal-content">
-			
-			
+
+
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
-					<div class="col-md-12 detailTopLine">
-						<div class="col-md-2 ">
-							<div class="detailProfileImageBox">
-								<img class="detailProfileImage" />
+					<div class="row">
+						<div class="container col-md-12 detailTopLine">
+							<div class="col-md-2 ">
+								<div class="detailProfileImageBox">
+									<img class="detailProfileImage" />
+								</div>
+							</div>
+							<div class="col-md-4 uploadUserNameBox">
+								<p class="detailUserName"></p>
+							</div>
+							<div class="col-md-6 uploadUserNameBox">
+								<p class="detailDate detailmodified"></p>
+								<p class="detailDate detailRegDate"></p>
 							</div>
 						</div>
-						<div class="col-md-4 uploadUserNameBox">
-							<p class="detailUserName"></p>
+						<div class="col-md-12 buttonLine">
+							<button class="btn btn-default btn-sm boardbutton" id="btn-detailDelete">삭제</button>
+							<button class="btn btn-default btn-sm boardbutton" id="btn-detailModify">수정</button>
 						</div>
-						<div class="col-md-4 uploadUserNameBox">
-							<p class="detailDate detailRegDate"></p>
-							<p class="detailDate detailmodified"></p>
-						</div>
+
 					</div>
 				</div>
 				<div class="modal-body">
-					<div class="col-md-12 buttonLine">
-						<button class="btn btn-default btn-sm boardbutton" id="btn-detailModify">수정</button>
-						<button class="btn btn-default btn-sm boardbutton" id="btn-detailDelete">삭제</button>
-					</div>
+					<div class="row">
+						<div class="col-md-12 imageLine"></div>
 
-					<div class="col-md-12 imageLine"></div>
 
-					<div class="col-md-12 boardContentBox"></div>
+						<div class="col-md-12 boardContentBox"></div>
 
-					<div class="col-md-12 fileDownloadBox">
-						<ul class="fileDownList">
+						<div class="col-md-12 fileDownloadBox">
+							<div class="row">
+								<ul class="fileDownList">
+								</ul>
+							</div>
+						</div>
 
-						</ul>
-					</div>
-
-					<div class="col-md-12 userCommentBox">
-						<div class="col-md-12 userComment">
+						<div class="col-md-12 userCommentBox">
 
 							<p class="userCommnetText"></p>
 						</div>
-					</div>
 
-					<div class="col-md-12 inputReplyLine">
-						<p class="inputReply">댓글 쓰기</p>
-						<input type="text inputReply" id="inputReplyText"></input>
-						<button class="btn btn-default btn-sm" id="createReply">등록</button>
+						<div class="col-md-12 inputReplyLine">
+							<div class="row">
+								<div class="input-group">
+									
+									<input type="text" class="form-control" id="inputReplyText" placeholder="댓글을 입력해주세요">
+									<span class="input-group-btn">
+										<button class="btn btn-secondary" id="createReply" type="button">등록</button>
+									</span>  ㅡ
+								</div>
+							</div>
+
+						</div>
+						<div class="col-md-12 replylistLine"></div>
 					</div>
-					<div class="col-md-12 replylistLine"></div>
 				</div>
-				<div class="modal-footer">
+			</div>
+			<div class="modal-footer">
+				<div class="row">
 					<div class="col-md-12 replylistPlus">
 						<button class="btn btn-default btn-sm" id="plusReplys">댓글 더보기</button>
 					</div>
 				</div>
-
 			</div>
+
 		</div>
+	</div>
 	</div>
 
 	<!--  게시물 수정 모달 -->

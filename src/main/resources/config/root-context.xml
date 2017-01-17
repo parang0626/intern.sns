@@ -17,7 +17,7 @@
 
 	<!-- Root Context: defines shared resources visible to all other web components -->
 	
-	<!--  프로퍼티 설정하기 -->
+	<!--  프로퍼티 설정하기111 -->
 	<util:properties id="properties" location="classpath:/properties/local-properties.xml"></util:properties>
 
 	<!-- 데이터 소스 설정을 위한 bean클래스 설정 -->

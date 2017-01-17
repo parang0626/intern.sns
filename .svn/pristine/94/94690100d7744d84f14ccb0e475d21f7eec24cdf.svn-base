@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties>
+	<comment>로컬테스트용 설정값들</comment>
+
+	<entry key="jdbc.url">jdbc:mariadb://192.168.6.88:3306/openit_beginner</entry>
+	<entry key="jdbc.username">snsUser</entry>
+	<entry key="jdbc.userpass">sns</entry>
+	<entry key="file.dirpath">C:/sns.platform.files</entry>
+	<entry key="ipaddress">http://localhost:8080</entry>
+
+</properties>
